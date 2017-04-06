@@ -34,7 +34,7 @@ class update:
                             filemode='w'
         )
 
-        #初始化TMPDIR
+        #初始化本地配置文件TMPDIR
         command_mkdir_tmp = 'mkdir -p %s/%s' % (TMPDIR, LOCALTIME)
         if os.path.exists(TMPDIR):
             logging.info("已经存在%s/%s目录" % (TMPDIR, LOCALTIME))
@@ -46,7 +46,7 @@ class update:
         """返回当前ip需要升级的war包列表
         """
         # 下载服务器的配置文件到本地
-        command_scp = 'scp %s@%s:%s %s/%s' % \
+        command_scp = 'scp %s@%s:%s %s/%s/' % \
                       (SERVER_USER, SERVER_IP, CONFPATH, TMPDIR, LOCALTIME)
         confPath = '%s/%s/update.conf' % (TMPDIR, LOCALTIME)
         command_rmconf = 'rm -f %s' % confPath
@@ -56,6 +56,7 @@ class update:
             os.system(command_scp)
             logging.info('配置文件%s已经下载到%s/%s下' % (confPath, TMPDIR, LOCALTIME))
         else:
+            logging.info("下载配置文件%s" % confPath)
             os.system(command_scp)
 
 
