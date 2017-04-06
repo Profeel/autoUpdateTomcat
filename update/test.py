@@ -1,5 +1,3 @@
-#-*- encoding:utf-8 -*-
-import os
+#!/usr/bin/env python
+from ConfigParser import ConfigParser
 
-if __name__ == '__main__':
-    pass
