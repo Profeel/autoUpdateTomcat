@@ -17,9 +17,10 @@ CONFPATH = '/home/dwzq/conf/update.conf'
 # 配置tmp目录
 TMPDIR = '/tmp/dwzq'
 LOGDIR = '/home/dwzq/log/'
-ADDIPLIST = []
-UPDATEIPLIST = []
-DELIPLIST = []
+
+
+APP_IP_LIST = []
+APP_ADD_FILE_LIST, APP_UPDATE_FILE_LIST, APP_DEL_FILE_LIST = [], [], []
 
 command_scp = 'scp %s@%s:%s %s/%s/' % \
               (SERVER_USER, SERVER_IP, CONFPATH, TMPDIR, LOCALTIME)
@@ -82,7 +83,7 @@ class update:
         except socket.error:
             return "127.0.0.1"
 
-    def readConf(self):
+    def readConf(self, sectionName, resultList):
         """读取配置文件内容，并匹配自己需要操作的war包
         :return: 本机需要操作的字典
         """
@@ -92,12 +93,18 @@ class update:
         # ====修改======
         #cf.read(confPath)
         cf.read('/mnt/hgfs/PycharmProjects/autoUpdateTomcat/conf/update.conf')
-        for opt in cf.options('app Hosts'):
-            hostname = cf.get('app Hosts', '%s' % opt)
-            ADDIPLIST.append(cf.get('%s' % hostname, 'ip'))
+        # 从配置中读取App服务器
+        for opt in cf.options(sectionName):
+            hostname = cf.get(sectionName, '%s' % opt)
+            resultList.append(cf.get('%s' % hostname, 'ip'))
+
+    def getConf(self):
+        APP_IP_LIST = self.readConf('App hosts', APP_IP_LIST)
+
+
 
 if __name__ == '__main__':
     u = update()
     u.getUpdateConf()
-    u.readConf()
-    print ADDIPLIST
+    u.getConf()
+    print APP_IP_LIST
