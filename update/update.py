@@ -6,13 +6,20 @@ import logging
 import socket
 from ConfigParser import ConfigParser
 
-
+# 系统当前日期如20170407
+LOCALTIME = time.strftime('%Y%m%d', time.localtime())
+# 服务器ip
 SERVER_IP = '192.168.184.136'
+# 连接服务器使用用户名
 SERVER_USER = 'root'
+# 服务器配置文件位置
 CONFPATH = '/home/dwzq/conf/update.conf'
+# 配置tmp目录
 TMPDIR = '/tmp/dwzq'
 LOGDIR = '/home/dwzq/log/'
-LOCALTIME = time.strftime('%Y%m%d', time.localtime())
+ADDIPLIST = []
+UPDATEIPLIST = []
+DELIPLIST = []
 
 command_scp = 'scp %s@%s:%s %s/%s/' % \
               (SERVER_USER, SERVER_IP, CONFPATH, TMPDIR, LOCALTIME)
@@ -31,6 +38,7 @@ class update:
         else:
             os.system(command_mkdirLog)
             print '创建日志目录%s' % LOGDIR
+        print logPath
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s %(filename)s %'
                                    '(levelname)s %(message)s',
@@ -40,11 +48,12 @@ class update:
         )
 
         #初始化本地配置文件TMPDIR
-        command_mkdir_tmp = 'mkdir -p %s/%s' % (TMPDIR, LOCALTIME)
-        if os.path.exists(TMPDIR):
-            logging.info("已经存在%s/%s目录" % (TMPDIR, LOCALTIME))
+        tmpConfDir = TMPDIR + '/' + LOCALTIME
+        command_mkdir_tmp = 'mkdir -p %s' % tmpConfDir
+        if os.path.exists(tmpConfDir):
+            logging.info("已经存在%s目录" % tmpConfDir)
         else:
-            logging.info("创建了%s/%s目录" % (TMPDIR, LOCALTIME))
+            logging.info("创建了%s目录" % tmpConfDir)
             os.system(command_mkdir_tmp)
 
     def getUpdateConf(self):
@@ -80,12 +89,15 @@ class update:
         # 获取本机的ip地址
         localIP = self.get_local_ip()
         cf = ConfigParser()
-        cf.read(confPath)
-        print cf.options('appHosts')
-
-
+        # ====修改======
+        #cf.read(confPath)
+        cf.read('/mnt/hgfs/PycharmProjects/autoUpdateTomcat/conf/update.conf')
+        for opt in cf.options('app Hosts'):
+            hostname = cf.get('app Hosts', '%s' % opt)
+            ADDIPLIST.append(cf.get('%s' % hostname, 'ip'))
 
 if __name__ == '__main__':
     u = update()
     u.getUpdateConf()
     u.readConf()
+    print ADDIPLIST
